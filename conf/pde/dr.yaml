@@ -1,0 +1,7 @@
+funcspace:
+  name: "COS"
+  params:
+    N: 20
+
+solver:
+  
