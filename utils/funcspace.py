@@ -2,19 +2,6 @@ from typing import overload
 from deepxde.data.function_spaces import FunctionSpace, GRF, Chebyshev, PowerSeries, GRF_KL, GRF2D
 import numpy as np
 
-
-@overload
-def getspace(name: str, params: dict) -> FunctionSpace: ...
-
-@overload
-def getspace(name: list[str], params: list[dict]) -> FunctionSpace: ...
-
-def getspace(name, params = None):
-    if isinstance(name, str):
-        getattr(name)(**params)
-    elif isinstance(name, list):
-        return UnionSpace(*[getspace(n, p) for n, p in zip(name, params)])
-    
 class COS(FunctionSpace):
     def __init__(self, N = 20):
         self._N = N
@@ -56,7 +43,7 @@ class UnionSpace(FunctionSpace):
         self._len = len(args)
     
     def random(self, size):
-        sizes = np.sort(np.random.randint(0, size+1, len(self.space)))
+        sizes = np.sort(np.random.randint(0, size + 1, len(self.space) - 1))
         sizes = np.concatenate([[0], sizes, [size]])
         out = []
         for i, (low, up) in enumerate(zip(sizes[:-1], sizes[1:])):
@@ -64,17 +51,20 @@ class UnionSpace(FunctionSpace):
                 out.append(None)
             else:
                 out.append(self.space[i].random(up-low))
+        return out
                 
     def eval_one(self, feature, x):
         out = []
-        for fea in feature:
+        for i, fea in enumerate(feature):
             if fea is not None:
-                out.append(self.space.eval_one(fea, x))
+                out.append(self.space[i].eval_one(fea, x))
         out = np.concatenate(out, axis=0)
+        return out
     
     def eval_batch(self, features, xs):
         out = []
-        for fea in features:
+        for i, fea in enumerate(features):
             if fea is not None:
-                out.append(self.space.eval_batch(fea, xs))
+                out.append(self.space[i].eval_batch(fea, xs))
         out = np.concatenate(out, axis=0)
+        return out
