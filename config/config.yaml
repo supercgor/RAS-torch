@@ -1,0 +1,8 @@
+defaults:
+  - _self_
+  - pde: dr
+  - funcspace: che+cos
+
+optimizer:
+  lr: 1.0e-4
+  weight_decay: 5.0e-3
